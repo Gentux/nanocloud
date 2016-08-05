@@ -36,6 +36,12 @@ module.exports = {
     },
     filePath: {
       type: 'string'
+    },
+    iconContents: {
+      type: 'string'
+    },
+    state: {
+      type: 'string'
     }
   }
 };

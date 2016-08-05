@@ -21,13 +21,16 @@
  *
  */
 
-/* globals Apps, MachineService */
+/* globals Apps, MachineService, PlazaService, StorageService */
+
+const Promise = require("bluebird");
 
 /**
  * Controller of apps resource.
  *
  * @class AppsController
  */
+
 module.exports = {
 
   /**
@@ -62,5 +65,66 @@ module.exports = {
           });
       })
       .catch((err) => res.negotiate(err));
+  },
+
+  patch: function(req, res) {
+
+    // Path is "/api/apps/*", there is always at least 4 elements in this split
+    let appId = req.path.split('/')[3];
+    let newApplication = null;
+
+    const updateApplication = Promise.promisify(Apps.update);
+
+    updateApplication({
+      id: appId
+    }, req.body.data.attributes)
+    .then((applications) => {
+      newApplication = applications[0];
+
+      if (newApplication.state === "running") {
+        return Promise.all([
+            MachineService.getMachineForUser(req.user),
+            StorageService.findOrCreate(req.user)
+        ])
+          .then((results) => {
+            let machine = results[0];
+            let storage = results[0];
+
+            // TODO hard coded plaza port
+            return PlazaService.exec(
+                machine.ip,
+                9090, {
+                  'hide-window': true,
+                  wait: true,
+                  username: machine.username,
+                  command: [
+                    "C:\\Windows\\System32\\net.exe",
+                    "use", "z:",
+                    "\\\\" + storage.hostname + "\\" + storage.username,
+                    "/user:" + storage.username,
+                    storage.Password
+                  ],
+                  stdin: ''
+                })
+            .then((res) => {
+              console.log(res.body);
+              console.log(res.data);
+              PlazaService.exec(machine.ip, 9090, {
+                command: [
+                  "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+                  "-Command",
+                  "-"
+                ],
+                stdin: "$a = New-Object -ComObject shell.application;$a.NameSpace( \"Z:\\\" ).self.name = \"Storage\""
+              });
+            });
+
+            // TODO Launch app
+          });
+      }
+
+      return res.ok(newApplication);
+    })
+    .catch((err) => res.negotiate(err));
   }
 };
