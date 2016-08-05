@@ -39,21 +39,18 @@ module.exports = {
    * @param {[]string} commands to execute
    * @return {Promise} Request to Plaza
    */
-  exec: function(hostname, port, cmd, stdin) {
-    let options = {
+  exec: function(hostname, port, options) {
+    let requestOptions = {
       url: "http://" + hostname + ":" + port + "/exec",
       headers: {
         'Content-Type': 'application/json'
       },
       json: true,
-      body: {
-        "command": cmd,
-        "stdin": stdin
-      },
+      body: options,
       method: 'POST'
     };
 
-    return request(options);
+    return request(requestOptions);
   },
 
   /**

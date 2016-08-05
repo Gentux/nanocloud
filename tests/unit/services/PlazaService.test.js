@@ -44,7 +44,10 @@ describe("PlazaService", function() {
 
   describe('Exec simple command', function() {
     it('Should return success', (done) => {
-      return PlazaService.exec("localhost", 9090, ["ls", "-l"], "")
+      return PlazaService.exec("localhost", 9090, {
+        command: ["ls", "-l"],
+        stdin: ""
+      })
       .then((res) => {
         expect(res.success).to.equal(true);
         done();

@@ -76,6 +76,11 @@ module.exports.routes = {
     action: 'connections'
   },
 
+  'PATCH /api/apps/*': {
+    controller: 'Apps',
+    action: 'patch'
+  },
+
   'POST /api/upload': {
     controller: 'Storage',
     action: 'upload'
