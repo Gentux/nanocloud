@@ -59,7 +59,6 @@ module.exports = {
 
         return Promise.reject(new Error('User already exists'));
       })
-
       .then((configuration) => {
         var host = configuration.host;
         var to =  user.email;
