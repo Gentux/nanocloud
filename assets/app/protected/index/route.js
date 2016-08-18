@@ -27,14 +27,10 @@ import Ember from 'ember';
 export default Ember.Route.extend({
   redirect() {
 
+    let controller = this.controllerFor('protected');
     if (this.get('session.isAuthenticated') === true && !this.get('directLinkParams')) {
-
-      if (this.get('session.user.isAdmin')) {
-        this.transitionTo('protected.dashboard');
-      }
-      else {
-        this.transitionTo('protected.apps');
-      }
+      this.transitionTo('protected.dashboard');
+      controller.set('teamModal', true);
     }
   },
 });

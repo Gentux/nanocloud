@@ -30,9 +30,9 @@ export default Ember.Controller.extend({
   actions: {
     submitForm() {
       this.set('loadState', 1);
-      this.get('model')
-      .save()
-      .then(() => {
+			this.get('model')
+			.save()
+			.then(() => {
         this.set('loadState', 2);
         this.toast.success('Please check out your mails to activate your account', 'Account created');
         Ember.run.later((() => {

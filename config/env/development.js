@@ -65,6 +65,7 @@ module.exports = {
     expirationDate: 0,
     autoRegister: false,
     autoLogoff: false,
+    teamEnabled: false,
     defaultGroup: '',
     creditLimit: '',
 

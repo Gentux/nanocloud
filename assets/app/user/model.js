@@ -105,7 +105,7 @@ export default DS.Model.extend(Validations, {
     return this.get('isAdmin') ? 'Administrator' : 'Regular user';
   }),
 
+  team: DS.belongsTo(),
   groups: DS.hasMany('group'),
-  team: DS.belongsTo('team'),
   isTeamAdmin: DS.attr('boolean')
 });
