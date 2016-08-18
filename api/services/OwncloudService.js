@@ -207,9 +207,9 @@ function findOrCreateUser(user) {
   return getUser(user.id)
   .then(() => {
     return OwncloudUser.findOne(user.id)
-    .then((user) => {
-      if (user) {
-        return user.password;
+    .then((owncloudUser) => {
+      if (owncloudUser) {
+        return owncloudUser.password;
       } else {
 
         // We have, somehow, lost the owncloud user password.
@@ -217,7 +217,13 @@ function findOrCreateUser(user) {
         const password = Math.random().toString(36).slice(-20);
 
         return updateUserPassword(user.id, password)
-        .then(() => password);
+        .then(() => {
+          return OwncloudUser.create({
+            id: user.id,
+            password: password
+          })
+          .then(() => password);
+        });
 
       }
     });
@@ -281,7 +287,8 @@ function createShare(user) {
               return;
             }
 
-            if (res.statusCode !== 201) {
+            if (res.statusCode !== 201 &&
+                res.body.indexOf('The resource you tried to create already exists') === -1) {
               reject(new Error('Unable to create the user shared directory'));
               return;
             }

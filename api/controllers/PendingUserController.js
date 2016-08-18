@@ -72,7 +72,9 @@ module.exports = {
           .then((message) => {
             return EmailService.sendMail(to, subject, message)
               .then(() => {
-                return PendingUser.create(JsonApiService.deserialize(user));
+                let userToAdd = JsonApiService.deserialize(user);
+                userToAdd.team = req.body.data.relationships.team.data.id;
+                return PendingUser.create(userToAdd);
               })
               .then((created_user) => {
                 return res.created(created_user);
