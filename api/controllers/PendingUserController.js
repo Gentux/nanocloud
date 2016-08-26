@@ -31,6 +31,7 @@
 const Promise = require('bluebird');
 const uuid    = require('node-uuid');
 const moment  = require('moment');
+const _       = require('lodash');
 
 module.exports = {
 
@@ -73,7 +74,12 @@ module.exports = {
             return EmailService.sendMail(to, subject, message)
               .then(() => {
                 let userToAdd = JsonApiService.deserialize(user);
-                userToAdd.team = req.body.data.relationships.team.data.id;
+                let teamId = _.get(req.body, 'data.relationships.team.data.id');
+
+                if (teamId) {
+                  userToAdd.team = teamId;
+                }
+
                 return PendingUser.create(userToAdd);
               })
               .then((created_user) => {
