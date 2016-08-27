@@ -154,24 +154,23 @@ module.exports = {
                     wait: true,
                     hideWindow: true,
                     username: machine.username,
-                    stdin: '$a = New-Object -ComObject shell.application;$a.NameSpace( "Z:\" ).self.name = "Storage"'
+                    stdin: '$a = New-Object -ComObject shell.application;$a.NameSpace( "Z:\" ).self.name = "Personal Storage"'
                   });
                 })
                 .then(() => {
                   if (req.user.team) {
                     Team.findOne(req.user.team)
                       .then((team) => {
-                        return ConfigService.get('storageAddress', 'storagePort')
+                        return ConfigService.get('teamStorageAddress')
                           .then((config) => {
                             let command = [
-                                `C:\\Windows\\System32\\net.exe`,
-                                'use',
-                                'y:',
-                                `\\\\${config.storageAddress}\\${team.username}`,
-                                `/user:${team.username}`,
-                                team.password
+                              `C:\\Windows\\System32\\net.exe`,
+                              'use',
+                              'y:',
+                              `\\\\${config.teamStorageAddress}\\${team.username}`,
+                              `/user:${team.username}`,
+                              team.password
                             ];
-                            console.log(JSON.stringify(command));
                             return PlazaService.exec(machine.ip, machine.plazaport, {
                               command: command,
                               wait: true,
@@ -182,6 +181,19 @@ module.exports = {
                                 console.log(err);
                               });
                           });
+                      })
+                      .then(() => {
+                        return PlazaService.exec(machine.ip, machine.plazaport, {
+                          command: [
+                            `C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe`,
+                            '-Command',
+                            '-'
+                          ],
+                          wait: true,
+                          hideWindow: true,
+                          username: machine.username,
+                          stdin: '$a = New-Object -ComObject shell.application;$a.NameSpace( "Y:\" ).self.name = "Team"'
+                        });
                       });
                   }
                 });
