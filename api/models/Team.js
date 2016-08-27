@@ -78,11 +78,11 @@ module.exports = {
 
   beforeCreate: function(values, next) {
 
-    ConfigService.get('storageAddress', 'storagePort')
+    ConfigService.get('teamStorageAddress', 'teamStoragePort')
       .then((config) => {
         return PlazaService.exec(
-          config.storageAddress,
-          config.storagePort, {
+          config.teamStorageAddress,
+          config.teamStoragePort, {
             command: ['useradd',
                       values.username,
                       '--create-home',
@@ -93,8 +93,8 @@ module.exports = {
           })
           .then(() => {
             return PlazaService.exec(
-              config.storageAddress,
-              config.storagePort, {
+              config.teamStorageAddress,
+              config.teamStoragePort, {
                 command: ['smbpasswd',
                           '-a',
                           values.username
@@ -110,4 +110,3 @@ module.exports = {
       });
   }
 };
-
