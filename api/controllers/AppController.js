@@ -26,81 +26,6 @@ const _ = require('lodash');
 const querystring = require('querystring');
 
 /* globals App, MachineService, JsonApiService, PlazaService, OwncloudService */
-/* globals StorageService */
-
-function mountUserStorage(machine, user) {
-  return StorageService.findOrCreate(user)
-  .then((storage) => {
-    return PlazaService.exec(machine.ip, machine.plazaport, {
-      command: [
-        `C:\\Windows\\System32\\net.exe`,
-        'use',
-        'z:',
-        `\\\\${storage.hostname}\\${storage.username}`,
-        `/user:${storage.username}`,
-        storage.password
-      ],
-      wait: true,
-      hideWindow: true,
-      username: machine.username
-    })
-    .then(() => {
-      return PlazaService.exec(machine.ip, machine.plazaport, {
-        command: [
-          `C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe`,
-          '-Command',
-          '-'
-        ],
-        wait: true,
-        hideWindow: true,
-        username: machine.username,
-        stdin: '$a = New-Object -ComObject shell.application;$a.NameSpace( "Z:\" ).self.name = "Storage"'
-      });
-    })
-    .catch(() => {
-      // User storage is probably already mounted
-      console.error('Unable to mount user storage');
-    });
-  });
-}
-
-function launchApp(machine, application) {
-  return PlazaService.exec(machine.ip, machine.plazaport, {
-    command: [
-      application.filePath
-    ],
-    username: machine.username
-  });
-}
-
-function mountTeamStorage(machine, user) {
-  return OwncloudService.getStorageForUser(user)
-  .then((webdav) => {
-
-    let username = querystring.unescape(webdav.username);
-    let password = querystring.unescape(webdav.password);
-
-    return PlazaService.exec(machine.ip, machine.plazaport, {
-      command: [
-        'C:\\Windows\\System32\\net.exe',
-        'use',
-        'Y:',
-        webdav.url,
-        `/user:${username}`,
-        '/persistent:no',
-        password,
-      ],
-      username: machine.username,
-      'hide-window': true,
-      wait: true
-    });
-  })
-  .catch((/* err */) => {
-    // console.error(err);
-    console.error('Unable to mount Owncloud storage');
-  });
-}
-
 
 /**
  * Controller of apps resource.
@@ -177,7 +102,6 @@ module.exports = {
   },
 
   update(req, res) {
-    const user = req.user;
 
     let applicationData = JsonApiService.deserialize(req.body.data);
 
@@ -191,34 +115,6 @@ module.exports = {
         if (application.state === 'running') {
           MachineService.getMachineForUser(req.user)
             .then((machine) => {
-
-              if (user.team) {
-                OwncloudService.getStorageForUser(user)
-                .then((webdav) => {
-
-                  let username = querystring.unescape(webdav.username);
-                  let password = querystring.unescape(webdav.password);
-
-                  return PlazaService.exec(machine.ip, machine.plazaport, {
-                    command: [
-                      'C:\\Windows\\System32\\net.exe',
-                      'use',
-                      'Y:',
-                      webdav.url,
-                      `/user:${username}`,
-                      '/persistent:no',
-                      password,
-                    ],
-                    username: machine.username,
-                    'hide-window': true,
-                    wait: true
-                  })
-                  .catch((err) => {
-                    console.error(err);
-                  });
-                });
-              }
-
               return PlazaService.exec(machine.ip, machine.plazaport, {
                 command: [
                   application.filePath
@@ -260,9 +156,38 @@ module.exports = {
                     username: machine.username,
                     stdin: '$a = New-Object -ComObject shell.application;$a.NameSpace( "Z:\" ).self.name = "Storage"'
                   });
+                })
+                .then(() => {
+                  if (req.user.team) {
+                    Team.findOne(req.user.team)
+                      .then((team) => {
+                        return ConfigService.get('storageAddress', 'storagePort')
+                          .then((config) => {
+                            let command = [
+                                `C:\\Windows\\System32\\net.exe`,
+                                'use',
+                                'y:',
+                                `\\\\${config.storageAddress}\\${team.username}`,
+                                `/user:${team.username}`,
+                                team.password
+                            ];
+                            console.log(JSON.stringify(command));
+                            return PlazaService.exec(machine.ip, machine.plazaport, {
+                              command: command,
+                              wait: true,
+                              hideWindow: true,
+                              username: machine.username
+                            })
+                              .catch((err) => {
+                                console.log(err);
+                              });
+                          });
+                      });
+                  }
                 });
             });
         }
+
         return res.ok(application);
       })
       .catch((err) => {
