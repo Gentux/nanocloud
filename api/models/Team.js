@@ -25,7 +25,10 @@
  * @docs        :: http://sailsjs.org/documentation/concepts/models-and-orm/models
  */
 
+/* globals ConfigService */
+
 const uuid = require('node-uuid');
+const randomstring = require('randomstring');
 
 module.exports = {
 
@@ -38,6 +41,22 @@ module.exports = {
       uuidv4: true,
       defaultsTo() {
         return uuid.v4();
+      }
+    },
+    username: {
+      type: 'string',
+      defaultsTo() {
+        return randomstring.generate({
+            length: 30,
+            charset: 'alphabetic',
+            capitalization: 'lowercase',
+        });
+      }
+    },
+    password: {
+      type: 'string',
+      defaultsTo() {
+        return randomstring.generate(60);
       }
     },
 
@@ -55,6 +74,40 @@ module.exports = {
       collection: 'pendinguser',
       via: 'team'
     }
+  },
+
+  beforeCreate: function(values, next) {
+
+    ConfigService.get('storageAddress', 'storagePort')
+      .then((config) => {
+        return PlazaService.exec(
+          config.storageAddress,
+          config.storagePort, {
+            command: ['useradd',
+                      values.username,
+                      '--create-home',
+                      '--groups',
+                      'users'
+                     ],
+            wait: true
+          })
+          .then(() => {
+            return PlazaService.exec(
+              config.storageAddress,
+              config.storagePort, {
+                command: ['smbpasswd',
+                          '-a',
+                          values.username
+                         ],
+                stdin: values.password + '\n' + values.password,
+                wait: true
+              });
+          })
+          .then(() => {
+            return next();
+          })
+          .catch(next);
+      });
   }
 };
 
