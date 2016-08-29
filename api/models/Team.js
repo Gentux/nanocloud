@@ -25,7 +25,7 @@
  * @docs        :: http://sailsjs.org/documentation/concepts/models-and-orm/models
  */
 
-/* globals ConfigService */
+/* globals ConfigService, PlazaService */
 
 const uuid = require('node-uuid');
 const randomstring = require('randomstring');

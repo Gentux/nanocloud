@@ -34,6 +34,9 @@ export default Ember.Controller.extend({
   dimBackground: Ember.computed.and('focusModeTeams', 'protectedController.hasNoTeam'),
   focusModeTeams: false,
   loadState: false,
+  items: null,
+
+  modelIsEmpty: Ember.computed.empty('items', 'items'),
 
   sortableTableConfig: {
 
@@ -76,6 +79,46 @@ export default Ember.Controller.extend({
       "template": "protected/users/teams/index/table/activated-user",
     }
   ],
+
+  fileColumns: [
+    {
+      propertyName: 'type',
+      title: 'Type',
+      disableFiltering: true,
+      filterWithSelect: false,
+      className: 'short',
+      template: 'protected/files/index/table/file-list/file-type',
+      disableSorting: true,
+    },
+    {
+      propertyName: 'name',
+      title: 'Filename',
+      disableFiltering: true,
+      filterWithSelect: false,
+    },
+    {
+      propertyName: 'size',
+      title: 'Size',
+      disableFiltering: true,
+      filterWithSelect: false,
+      template: 'protected/files/index/table/file-list/size',
+    }
+  ],
+
+  teamFiles : Ember.computed('items', 'items', function() {
+
+    var ret = Ember.A([]);
+    this.get('items').forEach(function(item) {
+      if (item.get('type') !== 'directory') {
+        ret.push(Ember.Object.create({
+          type: item.get('icon'),
+          name: item.get('name'),
+          size: item.get('size'),
+        }));
+      }
+    });
+    return ret;
+  }),
 
   actions: {
     createTeam() {
