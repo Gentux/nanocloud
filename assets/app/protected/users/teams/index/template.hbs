@@ -7,14 +7,6 @@
     </span>
   </p>
 {{/if}}
-{{#if protectedController.hasTeam}}
-  <p class="color-primary indication m-t-1">
-    <span class="text">
-    {{icon-component class='va-mid color-success' size=22 materialIcon="done"}}
-    You are a member of the {{session.user.team.name}} team.
-    </span>
-  </p>
-{{/if}}
 
 {{#unless protectedController.hasTeam}}
 <div class="teams-focus-input group in-bl {{if dimBackground 'focus' }}">
@@ -95,3 +87,38 @@
     <div class="clearfix"></div>
   {{/if}}
 </div>
+
+{{#if protectedController.hasTeam}}
+  <div id="team-file-page">
+    <h4>
+      {{#link-to 'protected.users.teams' }}
+        Team files
+      {{/link-to}}
+    </h4>
+
+    <p class="color-primary indication m-t-1">
+      <span class="text">
+      {{icon-component class='va-mid color-success' size=22 materialIcon="done"}}
+      You are a member of the {{session.user.team.name}} team.
+      </span>
+    </p>
+
+    {{#if modelIsEmpty}}
+      There is no file
+    {{else}}
+      {{models-table
+        class="sortableTable"
+          data=teamFiles
+          filteringIgnoreCase=sortableTableConfig.filteringIgnoreCase
+          columns=fileColumns
+          showColumnsDropdown=false
+          customMessages=sortableTableConfig.messageConfig
+          customIcons=sortableTableConfig.customIcons
+          customClasses=sortableTableConfig.customClasses
+          useNumericPagination=true
+          multipleColumnsSorting=false
+      }}
+    {{/if}}
+    <div class="clearfix"></div>
+  </div>
+{{/if}}

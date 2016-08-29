@@ -25,8 +25,9 @@
 import Ember from 'ember';
 
 export default Ember.Route.extend({
-  setupController(controller) {
+  setupController(controller, model) {
     controller.set('model', this.store.createRecord('team', {}));
+    controller.set('items', model);
   },
 
   actions: {
@@ -34,5 +35,13 @@ export default Ember.Route.extend({
       let teamController = this.controllerFor('protected.users.teams');
       teamController.send('refreshTeamsData');
     }
+  },
+
+  model() {
+    return this.get('store').query('file', { filename: './', teams: true })
+      .catch((err) => {
+        this.toast.error(err, 'Couldn\'t retrieve files');
+      });
   }
+
 });
