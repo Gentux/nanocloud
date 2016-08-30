@@ -92,28 +92,28 @@ export default Ember.Controller.extend({
               .then((team) => {
                 this.set('focusModeTeams', false);
                 $('.teams-focus-input').velocity(
-                { 
-                  opacity: 0,
-                  right: "100%",
-                  position: "absolute"
-                },
-                {
-                  easing: 'easeOutQuart',
-                  duration: 700,
-                  visibility: "hidden",
-                });
+                  {
+                    opacity: 0,
+                    right: "100%",
+                    position: "absolute"
+                  },
+                  {
+                    easing: 'easeOutQuart',
+                    duration: 700,
+                    visibility: "hidden",
+                  });
                 this.toast.success('Team has been created successfully');
                 this.get('session.user').set('team', team.get('id'));
                 Ember.run.later((() => {
                   this.send('refreshModel');
                 }), 200);
               })
-            .catch(() => {
-              this.toast.error('An error occured. Team has not been created');
-            })
-            .finally(() => {
-              this.set('loadState', false);
-            });
+              .catch((err) => {
+                this.send("error", err);
+              })
+              .finally(() => {
+                this.set('loadState', false);
+              });
           }
         });
     },
