@@ -42,56 +42,54 @@ module.exports = {
       members: [ user.id ]
     };
 
-    Team.create(team)
-    .then((team) => {
+    return Team.create(team)
+      .then((team) => {
 
-      User.update(user.id, {
-        isTeamAdmin: true
+        return User.update(user.id, {
+          isTeamAdmin: true
+        })
+          .then(() => {
+            return Team.findOne(team.id)
+              .populate('members')
+              .populate('pendingMembers')
+              .then((teams) => {
+                res.send(JsonApiService.serialize('teams', teams));
+              });
+          });
       })
-      .then(() => {
-        Team.findOne(team.id)
-        .populate('members')
-        .populate('pendingMembers')
-        .then((teams) => {
-          res.send(JsonApiService.serialize('teams', teams));
-        });
-      });
-
-    });
+      .catch(res.negotiate);
   },
 
   find(req, res) {
     const user = req.user;
 
     if (user.isAdmin) {
-      Team.find()
-      .populate('members')
-      .populate('pendingMembers')
-      .then((teams) => {
-        res.send(JsonApiService.serialize('teams', teams));
-      });
-      return;
+      return Team.find()
+        .populate('members')
+        .populate('pendingMembers')
+        .then((teams) => {
+          res.send(JsonApiService.serialize('teams', teams));
+        })
+        .catch(res.negotiate);
     }
 
     if (!user.team) {
-      res.send(JsonApiService.serialize('teams', []));
-      return;
+      return res.send(JsonApiService.serialize('teams', []));
     }
 
     if (user.isTeamAdmin) {
-      Team.findOne(user.team)
-      .populate('members')
-      .populate('pendingMembers')
+      return Team.findOne(user.team)
+        .populate('members')
+        .populate('pendingMembers')
+        .then((teams) => {
+          res.send(JsonApiService.serialize('teams', [teams]));
+        })
+        .catch(res.negotiate);
+    }
+
+    return Team.findOne(user.team)
       .then((teams) => {
         res.send(JsonApiService.serialize('teams', [teams]));
       });
-      return;
-    }
-
-    Team.findOne(user.team)
-    .then((teams) => {
-      res.send(JsonApiService.serialize('teams', [teams]));
-    });
   }
 };
-
