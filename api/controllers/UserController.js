@@ -62,47 +62,38 @@ module.exports = {
 
     req.body = JsonApiService.deserialize(req.body);
 
+    if (req.user.id === req.allParams().id) {
+
+      return User.findOne(req.user.id)
+        .then((currentUser) => {
+          _.set(req.body, 'data.attributes.isAdmin', currentUser.isAdmin);
+          _.set(req.body, 'data.attributes.isTeamAdmin', currentUser.isTeamAdmin);
+
+          return JsonApiService.updateOneRecord(req, res);
+        });
+    }
+
     if (req.user.isAdmin) {
       return JsonApiService.updateOneRecord(req, res);
-    } else if (req.user.id === req.allParams().id) {
-      // Check if simple user isn't changing "admin" settings
-      return User.findOne({
-        id: req.allParams().id
-      })
-        .then((userToUpdate) => {
-          let isAdmin = _.get(req.body, 'data.attributes.isAdmin');
-          let isTeamAdmin = _.get(req.body, 'data.attributes.isTeamAdmin');
-          if ((isAdmin === undefined || userToUpdate.isTeamAdmin === isAdmin) &&
-              (isTeamAdmin === undefined || userToUpdate.isAdmin === isTeamAdmin)) {
-            return JsonApiService.updateOneRecord(req, res);
-          }
-        });
-    } else {
-      if (!req.allParams().id) {
-        return res.badRequest('Invalid user id');
-      }
-
-      return User.findOne(req.allParams().id)
-        .populate('groups')
-        .then((userToUpdate) => {
-          if (!req.user.isTeamAdmin || req.user.team.id !== userToUpdate.team.id) {
-            return res.forbidden('You need to be an administrator or team admin to perform this operation');
-          }
-
-          if (userToUpdate.isTeamAdmin !== _.get(req.body, 'data.attributes.isTeamAdmin')) {
-            return User.update({
-              id: req.allParams().id
-            }, {
-              isTeamAdmin: _.get(req.body, 'data.attributes.isTeamAdmin')
-            })
-            .then((user) => {
-              return res.ok(user);
-            });
-          } else {
-            return res.forbidden('You are not allowed to modify this user');
-          }
-        })
-        .catch(res.negotiate);
     }
+
+    return User.findOne(req.allParams().id)
+      .populate('groups')
+      .then((userToUpdate) => {
+        if (req.user.isTeamAdmin === false || req.user.team.id !== userToUpdate.team.id) {
+          return Promise.reject({
+            status: 403,
+            detail: 'You need to be an administrator or team admin to perform this operation'
+          });
+        }
+
+        return User.update({
+          id: req.allParams().id
+        }, {
+          isTeamAdmin: _.get(req.body, 'data.attributes.isTeamAdmin') || false
+        });
+      })
+      .then(res.ok)
+      .catch(res.negotiate);
   }
 };
