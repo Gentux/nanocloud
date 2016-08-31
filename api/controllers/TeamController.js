@@ -52,9 +52,7 @@ module.exports = {
             return Team.findOne(team.id)
               .populate('members')
               .populate('pendingMembers')
-              .then((teams) => {
-                res.send(JsonApiService.serialize('teams', teams));
-              });
+              .then(res.created);
           });
       })
       .catch(res.negotiate);
