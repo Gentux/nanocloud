@@ -215,5 +215,111 @@ module.exports = function() {
           });
       });
     });
+
+    describe('It should be impossible to two teams with the same name', function() {
+
+      let user1;
+      let user2;
+
+      before('Create users and teams', function(done) {
+
+        User.create({
+          email: 'user1@nanocloud.com',
+          team: null,
+          isTeamAdmin: false,
+          isAdmin: false
+        })
+          .then((user) => {
+            user1 = user;
+          })
+          .then(() => {
+            return User.create({
+              email: 'user2@nanocloud.com',
+              team: null,
+              isTeamAdmin: false,
+              isAdmin: false
+            });
+          })
+          .then((user) => {
+            user2 = user;
+          })
+          .then(() => {
+            return AccessToken.create({
+              userId: user1.id
+            });
+          })
+          .then((user1token) => {
+            user1.token = user1token.token;
+          })
+          .then(() => {
+            return AccessToken.create({
+              userId: user2.id
+            });
+          })
+          .then((user2token) => {
+            user2.token = user2token.token;
+          })
+          .then(() => {
+            return done();
+          });
+      });
+
+      after('Cleaning users and access tokens', function(done) {
+
+        User.destroy([
+          user1.id,
+          user2.id
+        ])
+          .then(() => {
+            return AccessToken.destroy({
+              token: [user1.token, user2.token]
+            });
+          })
+          .then(() => {
+            return Team.destroy({
+              name: 'Unique name'
+            });
+          })
+          .then(() => {
+            return done();
+          });
+      });
+
+      it('Should return a bad request', function(done) {
+
+        nano.request(sails.hooks.http.app)
+          .post('/api/teams/')
+          .send({
+            data: {
+              attributes: {
+                name: 'Unique name'
+              },
+              type: 'teams'
+            }
+          })
+          .set('Authorization', 'Bearer ' + user1.token)
+          .expect(201)
+          .then(() => {
+            return nano.request(sails.hooks.http.app)
+              .post('/api/teams/')
+              .send({
+                data: {
+                  attributes: {
+                    name: 'Unique name'
+                  },
+                  type: 'teams'
+                }
+              })
+              .set('Authorization', 'Bearer ' + user2.token)
+              .expect(400)
+              .expect((res) => {
+                console.log(res.body);
+              });
+          })
+          .then(() => {
+            done();
+          });
+      });
+    });
   });
 };
