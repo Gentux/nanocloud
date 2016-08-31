@@ -23,9 +23,8 @@
 
 const Promise = require('bluebird');
 const _ = require('lodash');
-const querystring = require('querystring');
 
-/* globals App, MachineService, JsonApiService, PlazaService, OwncloudService */
+/* globals App, ConfigService, MachineService, JsonApiService, PlazaService, StorageService, Team */
 
 /**
  * Controller of apps resource.
@@ -176,10 +175,7 @@ module.exports = {
                               wait: true,
                               hideWindow: true,
                               username: machine.username
-                            })
-                              .catch((err) => {
-                                console.log(err);
-                              });
+                            });
                           });
                       })
                       .then(() => {

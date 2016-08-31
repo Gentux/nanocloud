@@ -47,9 +47,9 @@ module.exports = {
       type: 'string',
       defaultsTo() {
         return randomstring.generate({
-            length: 30,
-            charset: 'alphabetic',
-            capitalization: 'lowercase',
+          length: 30,
+          charset: 'alphabetic',
+          capitalization: 'lowercase',
         });
       }
     },

@@ -31,7 +31,6 @@
 
 /* globals AccessToken, ConfigService, MachineService, PlazaService, Storage, StorageService, Team */
 
-const request = require('request-promise');
 const Promise = require('bluebird');
 
 module.exports = {
