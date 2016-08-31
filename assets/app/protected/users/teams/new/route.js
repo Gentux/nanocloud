@@ -29,10 +29,10 @@ export default Ember.Route.extend({
     controller.set('model', this.store.createRecord('pendinguser'));
   },
 
-	actions: {
-		refreshModel() {
+  actions: {
+    refreshModel() {
       let teamController = this.controllerFor('protected.users.teams');
       teamController.send('refreshTeamsData');
-		}
-	}
+    }
+  }
 });

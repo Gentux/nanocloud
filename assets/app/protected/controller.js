@@ -34,7 +34,7 @@ export default Ember.Controller.extend({
   teamModal: false,
   teamIsEmpty: Ember.computed.empty('session.user.team'),
   hasTeam: Ember.computed('session.user.team', function() {
-      return !Ember.isNone(this.get('session.user.team.name'));
+    return !Ember.isNone(this.get('session.user.team.name'));
   }),
   hasNoTeam: Ember.computed('session.user.team', function() {
     return this.get('session.user.team') !== undefined;

@@ -44,9 +44,9 @@ export default Ember.Route.extend({
     return this.store.query('team', {});
   },
 
-	actions: {
-		refreshTeamsData() {
-			this.refresh();
-		},
-	}
+  actions: {
+    refreshTeamsData() {
+      this.refresh();
+    },
+  }
 });
