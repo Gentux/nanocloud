@@ -34,7 +34,7 @@ module.exports = {
     const body = JsonApiService.deserialize(req.body);
 
     if (user.team) {
-      return res.negotiate(new Error('You already belong to a team'));
+      return res.badRequest('You already belong to a team');
     }
 
     let team = {
