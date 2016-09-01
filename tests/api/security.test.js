@@ -2545,7 +2545,7 @@ module.exports = function() {
         });
       });
 
-      describe('Get one team - Allowed for admins and regular user if team admins', function() {
+      describe('Get one team - Allowed for admins and regular users if member of the team', function() {
 
         it('Admin should be authorized if they are team admins', function(done) {
           nano.request(sails.hooks.http.app)
@@ -2563,18 +2563,18 @@ module.exports = function() {
             .end(done);
         });
 
-        it('Regular users should be authorized if team admin', function(done) {
+        it('Regular users should be authorized if team member', function(done) {
           nano.request(sails.hooks.http.app)
-            .get('/api/teams/' + team2.id)
-            .set('Authorization', 'Bearer ' + user2.token)
+            .get('/api/teams/' + team1.id)
+            .set('Authorization', 'Bearer ' + user1.token)
             .expect(200)
             .end(done);
         });
 
-        it('Regular users should be unauthorized if not team admin', function(done) {
+        it('Regular users should be unauthorized if not member', function(done) {
           nano.request(sails.hooks.http.app)
             .get('/api/teams/' + team1.id)
-            .set('Authorization', 'Bearer ' + user1.token)
+            .set('Authorization', 'Bearer ' + user2.token)
             .expect(403)
             .end(done);
         });
