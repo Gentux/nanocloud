@@ -27,6 +27,7 @@
 
 /* globals User, JsonApiService */
 
+const Promise = require('bluebird');
 const _= require('lodash');
 
 module.exports = {
