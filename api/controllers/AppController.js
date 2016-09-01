@@ -23,8 +23,9 @@
 
 const Promise = require('bluebird');
 const _ = require('lodash');
+const querystring = require('querystring');
 
-/* globals App, MachineService, JsonApiService, PlazaService, StorageService */
+/* globals App, MachineService, JsonApiService, PlazaService, StorageService, OwncloudService */
 
 /**
  * Controller of apps resource.
@@ -101,6 +102,7 @@ module.exports = {
   },
 
   update(req, res) {
+    const user = req.user;
 
     let applicationData = JsonApiService.deserialize(req.body.data);
 
@@ -114,6 +116,34 @@ module.exports = {
         if (application.state === 'running') {
           MachineService.getMachineForUser(req.user)
             .then((machine) => {
+
+              if (user.team) {
+                OwncloudService.getStorageForUser(user)
+                .then((webdav) => {
+
+                  let username = querystring.unescape(webdav.username);
+                  let password = querystring.unescape(webdav.password);
+
+                  return PlazaService.exec(machine.ip, machine.plazaport, {
+                    command: [
+                      'C:\\Windows\\System32\\net.exe',
+                      'use',
+                      'Y:',
+                      webdav.url,
+                      `/user:${username}`,
+                      '/persistent:no',
+                      password,
+                    ],
+                    username: machine.username,
+                    'hide-window': true,
+                    wait: true
+                  })
+                  .catch((err) => {
+                    console.error(err);
+                  });
+                });
+              }
+
               return PlazaService.exec(machine.ip, machine.plazaport, {
                 command: [
                   application.filePath

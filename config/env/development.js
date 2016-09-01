@@ -58,6 +58,11 @@ module.exports = {
     testMail: false,
     storageAddress: 'localhost',
     storagePort: 9090,
+
+    owncloudURL: 'localhost',
+    owncloudAdminUsername: '',
+    owncloudAdminPassword: '',
+
     uploadLimit: 0,
     expirationDate: 0,
     autoRegister: false,
