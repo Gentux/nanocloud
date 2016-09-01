@@ -41,7 +41,13 @@ export default Ember.Route.extend({
   },
 
   model() {
-    return this.store.query('team', {});
+    if (this.get('session.user.isAdmin')) {
+      return this.store.query('team', {});
+    } else if (this.get('session.user.team.id')) {
+      return this.store.findRecord('team', this.get('session.user.team.id'));
+    } else {
+      return [];
+    }
   },
 
   actions: {
