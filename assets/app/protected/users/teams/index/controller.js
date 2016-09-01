@@ -146,7 +146,8 @@ export default Ember.Controller.extend({
                     visibility: 'hidden',
                   });
                 this.toast.success('Team has been created successfully');
-                this.get('session.user').set('team', team.get('id'));
+                this.get('session.user').set('team', team);
+                this.get('session.user').set('isTeamAdmin', true);
                 Ember.run.later((() => {
                   this.send('refreshModel');
                 }), 200);
