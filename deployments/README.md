@@ -4,8 +4,6 @@ This directory is a collection of tools to deploy Nanocloud.
 
 ## Install with ansible
 
-### Dependencies
-
 You need ansible 1.9 or above to use this installation
 
 Install dependencies
@@ -20,7 +18,7 @@ ansible-galaxy install franklinkim.docker-compose
 
 ### Configure
 
-Configure where *ansible* will deploy your installation by modifying the
+Configure where *ansible* will deploy your installation by modifying
 *ansible_hosts* file.
 
 ```
@@ -51,10 +49,10 @@ ansible-playbook nanocloud.yml
 
 ## Run multiple instance on a same host
 
-The script *deploy-pr.sh* is here to help you deploy a specific Github Pull Request
-on any environment in parallel.
+Script *deploy-pr.sh* is here to help you deploy a specific Github Pull Request
+on any environement without closing another instance.
 
-You can deploy several PR on a single machine. Each deployment will have its
+You can deploy several PR in a single machine. Each deployment will have its
 own *database*, *frontend*, *backend* and *guacamole-client*.
 
 To use it, run the following command:
