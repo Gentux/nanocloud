@@ -1,3 +1,6 @@
 repository: Nanocloud
 branch: master
-#pull_request: XXX
+# pull_request: XXX
+# slack_token: XXXXXXXXX/YYYYYYYYY/ZZZZZZZZZZZZZZZZZZZZZZZZ
+# slack_channel: '#channelName'
+# slack_username: Deployator

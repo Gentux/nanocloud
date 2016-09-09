@@ -1,0 +1,39 @@
+- name: Send notification deployment pull request
+  uri:
+    url: https://hooks.slack.com/services/{{ slack_token }}
+    method: POST
+    body: '{
+      "mrkdwn": true,
+      "channel": {{ slack_channel }},
+      "username": {{ slack_username }},
+      "attachments": [
+        {
+          "pretext": "New pull request submitted",
+          "title": "Pull request #{{pull_request}}",
+          "title_link": "https://github.com/Nanocloud/{{repository}}/pull/{{pull_request}}",
+          "text": "Successfully deployed <http://{{ansible_host}}:42{{pull_request}}|here>.",
+          "color": "#7CD197"
+        }
+      ]
+    }'
+    body_format: json
+    HEADER_Content-Type: "application/json"
+  when:
+    - pull_request is defined
+    - slack_token is defined
+
+- name: Send notification deployment branch
+  uri:
+    url: https://hooks.slack.com/services/{{ slack_token }}
+    method: POST
+    body: '{
+      "channel": {{ slack_channel }},
+      "username": {{ slack_username }},
+      "text": "Branch {{branch|default(master)}} deployed <http://{{ansible_host}}|here>."
+    }'
+    body_format: json
+    HEADER_Content-Type: "application/json"
+  when:
+    - pull_request is undefined
+    - slack_token is defined
+
