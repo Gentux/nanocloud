@@ -1,23 +1,9 @@
 language: node_js
 node_js:
   - '6'
+services:
+  - postgresql: "9.5"
 before_script:
-  - sudo /etc/init.d/postgresql stop
-  - sudo apt-get -y remove --purge postgresql-9.1
-  - sudo apt-get -y remove --purge postgresql-9.2
-  - sudo apt-get -y remove --purge postgresql-9.3
-  - sudo apt-get -y remove --purge postgresql-9.4
-  - sudo apt-get -y autoremove
-  - sudo apt-key adv --keyserver keys.gnupg.net --recv-keys 7FCC7D46ACCC4CF8
-  - sudo sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt/ precise-pgdg main 9.5" >> /etc/apt/sources.list.d/postgresql.list'
-  - sudo apt-get update
-  - sudo apt-get -y install postgresql-9.5
-  - sudo sh -c 'echo "local all postgres trust" > /etc/postgresql/9.5/main/pg_hba.conf'
-  - sudo sh -c 'echo -n "host all all 127.0.0.1/32 trust" >> /etc/postgresql/9.5/main/pg_hba.conf'
-  - sudo /etc/init.d/postgresql restart
-  - psql --version
-  - psql -c 'create database nanocloud;' -U postgres
-  - psql -c "CREATE USER nanocloud WITH SUPERUSER PASSWORD 'nanocloud';" -U postgres
   - curl -fsSL https://golang.org/dl/go1.6.3.linux-amd64.tar.gz -o golang.tar.gz
   - echo "cdde5e08530c0579255d6153b08fdb3b8e47caabbe717bc7bcd7561275a87aeb  golang.tar.gz" | sha256sum -c -
   - sudo tar -C /usr/local -xzf golang.tar.gz && rm golang.tar.gz
@@ -31,6 +17,7 @@ before_script:
   - sudo PLAZA_PORT=9091 /go/src/github.com/Nanocloud/nanocloud/plaza/plaza &
   - cd /home/travis/build/Nanocloud/nanocloud
   - npm install
+script:
   - cd assets && npm install && bower install && ./node_modules/ember-cli/bin/ember build --environment=production && cd ../
 notifications:
     slack:
