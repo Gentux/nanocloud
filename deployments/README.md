@@ -37,13 +37,6 @@ api-instance1 ansible_host=10.0.0.2 ansible_user=user1
 api-customerX ansible_host=10.0.0.3 ansible_user=user2
 ```
 
-You can change hosts username to use in *nanocloud.yml*:
-
-```
-- hosts: all
-  remote_user: your-username-here
-```
-
 Use the file *deployments/roles/nanocloud/files/nanocloud/config.env* to
 override configuration variable like you should normally do with the *config.env*
 file
